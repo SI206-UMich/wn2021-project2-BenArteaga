@@ -64,11 +64,10 @@ def get_search_links():
         if i >= 10:
             break
         i += 1
-        url = 'https://www.goodreads.com/' + tag.get('href')
+        url = 'https://www.goodreads.com' + tag.get('href')
         urls.append(url)
     
     return urls
-
 
 
 def get_book_summary(book_url):
@@ -137,7 +136,7 @@ def extra_credit(filepath):
 class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
-
+    search_links = get_search_links()
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
@@ -165,13 +164,21 @@ class TestCases(unittest.TestCase):
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
+        dummy_list = []
+        self.assertEqual(type(get_search_links()), type(dummy_list))
 
         # check that the length of TestCases.search_urls is correct (10 URLs)
+        self.assertEqual(len(get_search_links()), 10)
 
-
-        # check that each URL in the TestCases.search_urls is a string
-        # check that each URL contains the correct url for Goodreads.com followed by /book/show/
-        pass
+        dummy_string = 'hello'
+        for url in self.search_links:
+            # check that each URL in the TestCases.search_urls is a string
+            self.assertEqual(type(url), type(dummy_string))
+            # check that each URL contains the correct url for Goodreads.com followed by /book/show/
+            regex = 'https://www.goodreads.com/book/show/'
+            found = re.findall(regex, url)
+            self.assertEqual(len(found), 1)
+        
 
 
     def test_get_book_summary(self):
