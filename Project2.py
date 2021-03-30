@@ -166,7 +166,15 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
+    fields = ['Book Title', 'Author Name']
+
+    with open(filename, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)
+        for tup in data:
+            row = [tup[0], tup[1]]
+            csvwriter.writerow(row)
+
 
 
 def extra_credit(filepath):
@@ -287,20 +295,32 @@ class TestCases(unittest.TestCase):
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
+        data = get_titles_from_search_results('search_results.htm')
 
         # call write csv on the variable you saved and 'test.csv'
+        write_csv(data, 'test.csv')
 
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
-
+        rows = []
+        with open('test.csv', 'r') as csvfile:
+            csvreader = csv.reader(csvfile)
+            for row in csvreader:
+                rows.append(row)
 
         # check that there are 21 lines in the csv
+        self.assertEqual(len(rows), 21)
 
         # check that the header row is correct
+        correct_header = ['Book Title', 'Author Name']
+        self.assertEqual(rows[0], correct_header)
 
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
+        first_row = ['Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling']
+        self.assertEqual(rows[1], first_row)
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
-        pass
+        last_row = ['Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling']
+        self.assertEqual(rows[20], last_row)
 
 
 if __name__ == '__main__':
