@@ -50,8 +50,25 @@ def get_search_links():
     “https://www.goodreads.com/book/show/kdkd".
 
     """
+    # create soup object from url
+    r = requests.get('https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc')
+    soup = BeautifulSoup(r.text, 'html.parser')
 
-    pass
+    # get all of the book tags on the page
+    book_tags = soup.find_all('a', class_='bookTitle')
+
+    # iterate through the first ten and add the url to the list
+    urls = []
+    i = 0
+    for tag in book_tags:
+        if i >= 10:
+            break
+        i += 1
+        url = 'https://www.goodreads.com/' + tag.get('href')
+        urls.append(url)
+    
+    return urls
+
 
 
 def get_book_summary(book_url):
