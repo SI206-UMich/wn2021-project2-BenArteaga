@@ -90,7 +90,6 @@ def get_book_summary(book_url):
     # get title and author
     left_container_tag = soup.find('div', class_='leftContainer')
     title_tag = left_container_tag.find('h1')
-    print(title_tag)
     author_tag = left_container_tag.find('a', class_='authorName')
 
     # get number of pages
@@ -118,7 +117,33 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
+    # read in file and create soup object
+    f = open(filepath, 'r')
+    file_content = f.readlines()
+    f.close()
+    file_string = ''
+    for line in file_content:
+        file_string += line
+    soup = BeautifulSoup(file_string, 'html.parser')
+
+    # class category container contains all of the categories
+    categories_tag = soup.find('div', class_='categoryContainer')
+
+    # class category clearFix contains an individual category
+    category_tags = categories_tag.find_all('div', class_='category clearFix')
+
+    # loop through the category tags and get all of the info
+    winners = []
+    for category_tag in category_tags:
+        winner_tag = category_tag.find('div', class_='category__winnerImageContainer')
+        winner_img = winner_tag.find('img')
+        book_title = winner_img.get('alt').strip('\n')
+        category_name = category_tag.find('h4').text.strip('\n')
+        category_url = category_tag.find('a').get('href').strip('\n')
+        winners.append((category_name, book_title, category_url))
+    
+    return winners
+
 
 
 def write_csv(data, filename):
@@ -235,17 +260,30 @@ class TestCases(unittest.TestCase):
 
     def test_summarize_best_books(self):
         # call summarize_best_books and save it to a variable
+        best_books = summarize_best_books('best_books_2020.htm')
 
         # check that we have the right number of best books (20)
+        self.assertEqual(len(best_books), 20)
 
+        for book in best_books:
             # assert each item in the list of best books is a tuple
+            dummy_tuple = ('hi', 'hi')
+            self.assertEqual(type(book), type(dummy_tuple))
 
             # check that each tuple has a length of 3
+            self.assertEqual(len(book), 3)
 
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
+        first_tuple = (
+            'Fiction', 'The Midnight Library', 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
+            )
+        self.assertEqual(best_books[0], first_tuple)
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-        pass
+        last_tuple = (
+            'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+        )
+        self.assertEqual(best_books[19], last_tuple)
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
