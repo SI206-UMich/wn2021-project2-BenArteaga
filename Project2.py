@@ -83,8 +83,28 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
+    # create soup object from book url
+    r = requests.get(book_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
 
-    pass
+    # get title and author
+    left_container_tag = soup.find('div', class_='leftContainer')
+    title_tag = left_container_tag.find('h1')
+    print(title_tag)
+    author_tag = left_container_tag.find('a', class_='authorName')
+
+    # get number of pages
+    anchor2 = left_container_tag.find('div', class_='uitext darkGreyText')
+    anchor3s = anchor2.find_all('span')
+    num_pages = 0
+    for tag in anchor3s:
+        if tag.get('itemprop') == 'numberOfPages':
+            # get the number of pages from the pages_tag
+            regex = '\d+'
+            num_pages = int(re.findall(regex, tag.text)[0])
+
+    return (title_tag.text, author_tag.text, num_pages)
+
 
 
 def summarize_best_books(filepath):
@@ -183,20 +203,34 @@ class TestCases(unittest.TestCase):
 
     def test_get_book_summary(self):
         # create a local variable – summaries – a list containing the results from get_book_summary()
+        summaries = []
         # for each URL in TestCases.search_urls (should be a list of tuples)
+        for url in self.search_links:
+            summary = get_book_summary(url)
+            summaries.append(summary)
 
         # check that the number of book summaries is correct (10)
+        self.assertEqual(len(summaries), 10)
 
+        for summ in summaries:
             # check that each item in the list is a tuple
+            dummy_tuple = ('hi', 'hi')
+            self.assertEqual(type(summ), type(dummy_tuple))
 
             # check that each tuple has 3 elements
+            self.assertEqual(len(summ), 3)
 
             # check that the first two elements in the tuple are string
+            dummy_string = 'yo'
+            self.assertEqual(type(summ[0]), type(dummy_string))
+            self.assertEqual(type(summ[1]), type(dummy_string))
 
             # check that the third element in the tuple, i.e. pages is an int
+            dummy_int = 3
+            self.assertEqual(type(summ[2]), type(dummy_int))
 
-            # check that the first book in the search has 337 pages
-            pass
+        # check that the first book in the search has 337 pages
+        self.assertEqual(summaries[0][2], 337)
 
 
     def test_summarize_best_books(self):
